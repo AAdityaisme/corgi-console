@@ -11,11 +11,13 @@ Built with Tauri 2 (Rust) + React 19 + TypeScript + Vite. macOS (Apple Silicon).
 
 1. Download `Corgi.Console_x.y.z_aarch64.dmg` from **[Releases](../../releases)**.
 2. Drag **Corgi Console** to Applications.
-3. First launch: the app is not notarized, so macOS will complain. **Right-click the app →
-   Open → Open** (once), or run:
+3. First launch: the app isn't notarized, so macOS will claim it's "damaged" — it isn't;
+   that's Gatekeeper on unsigned downloads. After copying to Applications, run this once
+   in Terminal, then open normally:
    ```bash
    xattr -cr "/Applications/Corgi Console.app"
    ```
+   (Right-click → Open may also work on older macOS, but the command above always does.)
 4. Launch. The app creates its data folder at `~/Desktop/corgi/corgi-os-data/` and an empty
    database on first run.
 
