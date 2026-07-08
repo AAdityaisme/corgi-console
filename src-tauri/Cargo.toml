@@ -1,0 +1,23 @@
+[package]
+name = "corgi-os"
+version = "1.0.0"
+description = "Corgi Console — Aadi's BDR command center"
+authors = ["Aadi"]
+edition = "2021"
+
+[lib]
+name = "corgi_os_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+tauri-plugin-notification = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+dirs = "5"
+rusqlite = { version = "0.32", features = ["bundled"] }
+csv = "1.3"
