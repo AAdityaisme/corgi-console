@@ -62,7 +62,7 @@ npx tauri build        # produces .app + .dmg under src-tauri/target/release/bun
 ```
 
 Dev loop: `npx tauri dev`. UI regression suite (Playwright + a mock Tauri bridge over your CSVs):
-`node tests/e2e.mjs`.
+`npx playwright install chromium && node tests/e2e.mjs` (needs `truckers.csv`/`brokers.csv` in the data dir).
 
 ## Architecture
 
