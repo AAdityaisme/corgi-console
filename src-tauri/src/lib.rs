@@ -1335,9 +1335,35 @@ fn read_doc(rel: String) -> Result<String, String> {
     fs::read_to_string(corgi_dir().join(&rel)).map_err(|e| e.to_string())
 }
 
+// Bundled starter data (public FMCSA/registry rows) so a fresh install demos every feature
+// immediately — signal-ranked queues, scripts, logging — instead of an empty screen.
+// Only runs when the leads table is empty AND no CSVs exist; a real CSV drop or pipeline
+// run replaces it via the normal import (upsert by lead_key).
+const SEED_TRUCKERS: &str = include_str!("../../seed/truckers_seed.csv");
+const SEED_BROKERS: &str = include_str!("../../seed/brokers_seed.csv");
+
+fn seed_if_empty(conn: &Connection) {
+    let lead_count: i64 = conn
+        .query_row("SELECT COUNT(*) FROM leads WHERE deleted_at IS NULL", [], |r| r.get(0))
+        .unwrap_or(0);
+    let t_csv = data_dir().join("truckers.csv");
+    let b_csv = data_dir().join("brokers.csv");
+    if lead_count > 0 || t_csv.exists() || b_csv.exists() {
+        return;
+    }
+    if fs::write(&t_csv, SEED_TRUCKERS).is_err() || fs::write(&b_csv, SEED_BROKERS).is_err() {
+        return;
+    }
+    let mut report = ImportReport { inserted: 0, updated: 0, skipped: 0, errors: vec![], fleets: 0, brokers: 0 };
+    let _ = import_file(conn, &t_csv, "fleet", &mut report);
+    let _ = import_file(conn, &b_csv, "broker", &mut report);
+    let _ = rebuild_fts(conn);
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let conn = open_db().expect("failed to open database");
+    seed_if_empty(&conn);
     tauri::Builder::default()
         .manage(Db(Mutex::new(conn)))
         .plugin(tauri_plugin_opener::init())
